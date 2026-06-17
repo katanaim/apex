@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APEX — how attractive are you, really?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#1ed760;--red:#ff4b4b;--amber:#f0a52a;--muted:#7d7d83;--faint:#3a3a3e;--line:#222227;--surface:#0e0e10;--mono:'Space Mono',ui-monospace,SFMono-Regular,Menlo,monospace;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html,body{background:#000;color:#fff;font-family:'Inter',-apple-system,BlinkMacSystemFont,Arial,sans-serif;}
+.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 12px 28px;}
+.mast{text-align:center;margin-bottom:11px;}
+.mast h1{font-size:15px;font-weight:700;}
+.mast p{font-size:11.5px;color:var(--muted);margin-top:4px;}
+.mast a{color:var(--green);text-decoration:none;}
+.device{width:390px;height:min(844px,calc(100vh - 130px));min-height:560px;background:radial-gradient(125% 80% at 50% 30%, #0c0c0e, #000 62%);border-radius:44px;border:1px solid #222227;box-shadow:0 0 0 9px #050506,0 22px 55px rgba(0,0,0,.65);position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:112px;height:28px;background:#000;border-radius:16px;z-index:40;}
+.status{height:46px;flex:0 0 46px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:12.5px;font-weight:600;z-index:30;}
+.prog{height:3px;flex:0 0 3px;margin:0 24px;background:#1c1c20;border-radius:3px;overflow:hidden;}
+.prog b{display:block;height:100%;width:0;background:#fff;transition:width .5s;}
+.back{position:absolute;top:50px;left:14px;z-index:35;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.07);border:none;color:#fff;font-size:18px;cursor:pointer;display:none;}
+.stage{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;}
+.stage::-webkit-scrollbar{width:0;}
+.scr{min-height:100%;display:flex;flex-direction:column;padding:34px 26px 0;animation:fadein .35s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);font-weight:400;margin-bottom:13px;}
+.ulabel{font-family:var(--mono);font-size:9.5px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+h2.h{font-family:'Archivo','Helvetica Neue',sans-serif;font-size:28px;line-height:1.05;font-weight:900;letter-spacing:-.5px;text-transform:uppercase;}
+p.s{font-size:14px;line-height:1.45;color:var(--muted);margin-top:11px;}
+.cap{font-size:11px;color:var(--faint);margin-top:12px;text-align:center;}
+.vis{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 0;min-height:110px;}
+.foot{flex:0 0 auto;padding:14px 26px calc(env(safe-area-inset-bottom) + 16px);position:sticky;bottom:0;background:linear-gradient(180deg,rgba(0,0,0,0),#000 24%);z-index:6;}
+.cta{width:100%;border:none;border-radius:32px;padding:17px;font-size:16px;font-weight:700;background:#fff;color:#000;cursor:pointer;}
+.cta:active{transform:translateY(1px);} .cta:disabled{opacity:.35;}
+.sec{display:block;width:100%;text-align:center;background:none;border:none;color:var(--muted);font-size:13px;margin-top:11px;cursor:pointer;}
+
+.draw{stroke-dasharray:1600;stroke-dashoffset:1600;animation:draw 1.3s ease forwards;}
+.draw.d2{animation-delay:.35s;}.draw.d3{animation-delay:.7s;}
+@keyframes draw{to{stroke-dashoffset:0;}}
+.pop{opacity:0;animation:pop .5s ease forwards;}
+@keyframes pop{to{opacity:1;}}
+text{font-family:'Inter',Arial,sans-serif;}
+
+.bars{width:100%;}
+.barrow{margin-bottom:15px;}
+.barrow .lab{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:7px;}
+.barrow .lab b{font-weight:600;} .barrow .lab span{color:var(--muted);font-weight:600;}
+.track{height:10px;background:#161618;border-radius:9px;overflow:hidden;}
+.fill{height:100%;border-radius:9px;transform-origin:left;transform:scaleX(0);animation:grow 1s ease forwards;background:var(--green);}
+@keyframes grow{to{transform:scaleX(1);}}
+
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:11px;width:100%;}
+.tile{background:#0e0e10;border:1px solid var(--line);border-radius:16px;padding:15px;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:64px;transition:.15s;}
+.tile.sel{border-color:#fff;background:#161618;}
+.tile .ic{width:30px;height:30px;flex:0 0 30px;display:flex;align-items:center;justify-content:center;color:#fff;}
+.tile .tl{font-size:14.5px;font-weight:600;}
+.gender{display:flex;gap:14px;width:100%;}
+.gcard{flex:1;background:#0e0e10;border:1px solid var(--line);border-radius:24px;padding:24px 14px;text-align:center;cursor:pointer;transition:.15s;}
+.gcard:active{transform:scale(.98);} .gcard.sel{border-color:#fff;background:#161618;}
+.gcard .ic{font-size:30px;margin-bottom:10px;} .gcard .gl{font-size:16px;font-weight:600;}
+
+.slwrap{width:100%;}
+.slnow{text-align:center;font-size:22px;font-weight:800;margin-bottom:18px;}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:4px;background:#222227;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;cursor:pointer;}
+.slends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:12px;}
+.bignum{font-family:'Archivo',sans-serif;font-size:60px;font-weight:900;text-align:center;line-height:1;}
+
+.ctrl{width:100%;}
+.crow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #222227;font-size:14.5px;}
+.crow .ck{width:22px;height:22px;border-radius:6px;flex:0 0 22px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
+.crow.y .ck{background:var(--green);color:#04240f;} .crow.n .ck{background:#222227;color:#7d7d83;}
+.crow.n{color:var(--muted);}
+
+.ringbox{position:relative;width:206px;height:206px;}
+.ringbox .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ringbox .ctr b{font-family:'Archivo',sans-serif;font-size:60px;font-weight:900;line-height:1;text-shadow:0 0 16px currentColor;}
+.ringbox .ctr span{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:7px;}
+
+.metric{display:flex;justify-content:space-between;align-items:center;background:#0e0e10;border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin-bottom:8px;}
+.metric .mn{font-size:14px;font-weight:500;} .metric .mv{font-weight:700;font-size:16px;}
+.metric.lock .mv{color:var(--faint);letter-spacing:3px;} .metric .lk{margin-left:8px;}
+.rvcard{background:#0e0e10;border:1px solid var(--line);border-radius:16px;padding:10px;margin-bottom:12px;}
+.rvphotos{display:flex;gap:6px;}
+.rvph{position:relative;flex:1;border-radius:12px;overflow:hidden;height:152px;background:#000;}
+.rvph img{width:100%;height:100%;object-fit:cover;object-position:center 30%;}
+.rvph .lbl{position:absolute;top:7px;left:7px;font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.6);color:#cfcfd3;}
+.rvph .lbl.a{background:var(--green);color:#04240f;left:auto;right:7px;}
+.rvbar{display:flex;justify-content:space-between;align-items:center;margin:11px 3px 0;}
+.rvscore{font-family:'Archivo',sans-serif;font-weight:900;font-size:24px;display:flex;align-items:center;gap:9px;}
+.rvscore .ar{color:var(--muted);font-weight:400;font-family:'Inter';}
+.rvscore .g,.rvname .g{color:var(--green);}
+.rvname{font-size:12.5px;color:var(--muted);}
+.rvq{font-size:12.5px;line-height:1.45;color:#cfcfd3;margin:9px 3px 3px;}
+.rvq .st{color:var(--green);letter-spacing:1px;}
+.revwrap{height:344px;overflow:hidden;position:relative;width:100%;-webkit-mask-image:linear-gradient(180deg,transparent,#000 7%,#000 90%,transparent);mask-image:linear-gradient(180deg,transparent,#000 7%,#000 90%,transparent);}
+.revtrack{animation:marq 30s linear infinite;}
+@keyframes marq{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+
+.vf{width:228px;height:296px;border-radius:24px;background:#0e0e10;border:1.5px solid #222227;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.vf img{width:100%;height:100%;object-fit:cover;}
+.vf .face{position:absolute;width:60%;height:74%;border:2px solid rgba(255,255,255,.5);border-radius:50%/42%;}
+.scanl{position:absolute;left:6%;right:6%;height:2px;background:var(--green);box-shadow:0 0 12px var(--green);animation:scanmove 2s linear infinite;}
+@keyframes scanmove{0%{top:6%}100%{top:92%}}
+
+/* analyzing */
+.anbox{width:100%;}
+.astep{display:flex;align-items:flex-start;gap:12px;padding:9px 0;opacity:0;animation:pop .4s ease forwards;}
+.astep .ico{width:20px;height:20px;flex:0 0 20px;margin-top:1px;}
+.spin{width:18px;height:18px;border:2px solid #2a2a2f;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.chk{width:20px;height:20px;border-radius:50%;background:var(--green);color:#04240f;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+.astep .body .ttl{font-size:14.5px;font-weight:600;}
+.astep .find{font-size:12.5px;margin-top:4px;display:flex;align-items:center;gap:7px;opacity:0;animation:pop .4s ease forwards;}
+.astep .find .d{width:7px;height:7px;border-radius:50%;flex:0 0 7px;}
+
+/* paywall */
+.tier{position:relative;background:#0e0e10;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer;}
+.tier.sel{border-color:#fff;background:#161618;}
+.tier .row{display:flex;justify-content:space-between;align-items:center;}
+.tier .nm{font-size:16px;font-weight:600;} .tier .pr{font-size:16px;font-weight:700;}
+.tier .meta{font-size:12.5px;color:var(--muted);margin-top:4px;}
+.tier .strike{text-decoration:line-through;color:var(--faint);} .tier .save{color:var(--green);font-weight:600;}
+.tier .badge{position:absolute;top:-9px;right:14px;background:#000;color:var(--muted);border:1px solid var(--line);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 9px;border-radius:999px;}
+.counter{font-size:12px;color:var(--green);text-align:center;margin-bottom:12px;}
+.runway{font-size:12px;color:var(--muted);text-align:center;margin-top:10px;}
+
+.ov{position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:50;display:flex;align-items:center;justify-content:center;animation:fadein .25s;}
+.osd{width:262px;background:#1c1c20;border-radius:15px;text-align:center;overflow:hidden;}
+.osd .tp{padding:18px 16px 14px;} .osd .tp b{font-size:15px;} .osd .tp p{font-size:12.5px;color:#cfcfd3;margin-top:6px;}
+.osd .bt{display:flex;border-top:1px solid #2e2e33;}
+.osd .bt button{flex:1;background:none;border:none;color:#0a84ff;font-size:15px;padding:12px;cursor:pointer;}
+.osd .bt button+button{border-left:1px solid #2e2e33;font-weight:600;}
+
+.unlock{display:flex;align-items:center;justify-content:center;}
+.statrow{display:flex;gap:10px;margin:6px 0 14px;}
+.statchip{flex:1;background:#0e0e10;border:1px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center;}
+.statchip b{font-family:'Archivo';font-weight:900;font-size:24px;display:block;line-height:1;}
+.statchip span{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.prov{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;border:none;background:#fff;color:#111;font-size:15px;font-weight:600;margin-bottom:10px;cursor:pointer;}
+.field{width:100%;padding:14px 16px;border-radius:12px;background:#0e0e10;border:1px solid var(--line);color:#fff;font-size:15px;}
+.planbanner{background:var(--surface);border:1px solid var(--line);border-left:2px solid var(--green);border-radius:16px;padding:16px;margin-bottom:6px;}
+.planbanner .pd{font-family:'Archivo';font-weight:900;font-size:24px;}
+.planbanner .pg{font-size:12.5px;color:var(--muted);margin-top:3px;}
+.ptrack{height:6px;background:#1c1c20;border-radius:6px;margin-top:11px;overflow:hidden;}
+.pfill{height:100%;background:var(--green);border-radius:6px;box-shadow:0 0 8px rgba(30,215,96,.5);}
+.task{display:flex;align-items:center;gap:12px;background:#0e0e10;border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:8px;font-size:14.5px;cursor:pointer;}
+.task .tb{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);flex:0 0 22px;}
+.task.done{color:var(--muted);text-decoration:line-through;}
+.task.done .tb{background:var(--green);border-color:var(--green);}
+.hint{font-size:12px;color:var(--muted);}
+.homehead{font-family:'Archivo';font-weight:900;font-size:18px;letter-spacing:2px;padding:2px 0 12px;}
+.scorebig{display:flex;justify-content:space-between;align-items:flex-end;background:#0e0e10;border:1px solid var(--line);border-radius:16px;padding:16px;}
+.lbl2{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.bn{font-family:'Archivo';font-weight:900;font-size:38px;line-height:1;margin-top:4px;}
+.gapbar{height:8px;background:#1c1c20;border-radius:8px;margin-top:12px;overflow:hidden;}
+.gapfill{height:100%;background:linear-gradient(90deg,#f0a52a,#1ed760);border-radius:8px;}
+.cap2{font-family:var(--mono);font-size:9.5px;fill:#7d7d83;}
+.cap2g{font-family:var(--mono);font-size:9.5px;fill:#1ed760;}
+.tabbar{display:flex;justify-content:space-around;border-top:1px solid var(--line);padding:9px 0 5px;background:#000;}
+.tabbar .tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--faint);cursor:pointer;}
+.tabbar .tab.on{color:var(--green);}
+.tabbar .ic{font-size:18px;line-height:1;}
+.iaptile{display:flex;align-items:center;justify-content:space-between;background:#0e0e10;border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px;}
+.iaptile b{font-size:14.5px;font-weight:600;}
+.iaptile .ip{font-size:12px;color:var(--muted);margin-top:3px;}
+.iaptile .price{font-family:'Archivo';font-weight:900;color:var(--green);font-size:16px;}
+.iaptile .lk{color:var(--green);font-size:18px;}
+.chat{display:flex;flex-direction:column;gap:10px;margin:8px 0;}
+.cb{max-width:82%;padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.4;}
+.cb.user{align-self:flex-end;background:#1c1c20;color:#fff;}
+.cb.ai{align-self:flex-start;background:#0e0e10;border:1px solid var(--line);}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.chip2{background:#0e0e10;border:1px solid var(--line);border-radius:12px;padding:8px 13px;font-size:12.5px;color:#cfcfd3;cursor:pointer;}
+.deg{font-family:var(--mono);font-size:11px;font-weight:700;}
+.cl{font-family:var(--mono);font-size:8.5px;fill:#7d7d83;text-transform:uppercase;}
+.clv{font-family:var(--mono);font-size:13px;font-weight:700;}
+.repcols{display:flex;gap:10px;margin-bottom:4px;}
+.repcol{flex:1;background:#0e0e10;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13px;color:#cfcfd3;}
+.repcol .rh{font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-weight:700;}
+.ptrack{position:relative;}
+.mile{position:absolute;top:0;width:2px;height:100%;background:#3a3a3e;transform:translateX(-1px);}
+.mile.next{background:#1ed760;}
+.milelbl{font-size:11px;color:#1ed760;margin-top:8px;}
+.reward{background:rgba(30,215,96,.12);border:1px solid #1ed760;border-radius:12px;padding:12px 14px;font-size:13px;color:#dff5e6;margin-top:6px;animation:pop .4s ease;}
+.prog2{background:#0e0e10;border:1px solid var(--line);border-radius:16px;padding:13px 15px;margin-bottom:10px;}
+.prog2 .p2t{display:flex;justify-content:space-between;align-items:baseline;}
+.prog2 .p2t b{font-size:14.5px;font-weight:600;}.prog2 .p2t span{font-size:12px;color:var(--muted);}
+.p2track{height:6px;background:#1c1c20;border-radius:6px;margin-top:9px;overflow:hidden;}
+.p2fill{height:100%;border-radius:6px;}
+.animframe{width:calc(100% + 52px);margin:0 -26px;height:420px;border:none;background:#000;display:block;}
+.glowframe{width:100%;height:330px;border:none;border-radius:14px;background:#000;display:block;}
+.tb{display:flex;gap:9px;align-items:center;margin-top:14px;background:#121216;border:1px solid #222227;border-radius:13px;padding:7px 9px;max-width:390px;width:100%;}
+.tb button{background:#222228;border:none;color:#fff;border-radius:8px;padding:9px 13px;font-size:14px;cursor:pointer;}
+.tb select{flex:1;min-width:0;background:#1c1c20;color:#fff;border:1px solid #2a2a30;border-radius:8px;padding:8px;font-size:12px;}
+.dbgcl{font-size:11px;color:var(--muted);margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="mast"><h1>APEX</h1><p>rate-my-face · interactive prototype</p></div>
+  <div class="device">
+    <div class="notch"></div>
+    <div class="status"><span>9:41</span><span>●●●  ✦  100</span></div>
+    <button class="back" id="back" onclick="back()">‹</button>
+    <div class="prog"><b id="progb"></b></div>
+    <div class="stage" id="stage"></div>
+  </div>
+  <div class="tb"><button onclick="back()">◀</button><select id="jump" onchange="goTo(this.selectedIndex)"></select><button onclick="next()">▶</button></div>
+  <div class="dbgcl" id="cl"></div>
+</div>
+<input type="file" id="filein" accept="image/*" style="display:none">
+<script>
+let PHOTO=null, idx=0;
+const ic={
+ jaw:'<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.6"><path d="M6 4v6c0 5 3 8 6 8s6-3 6-8V4"/></svg>',
+ skin:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11Z"/></svg>',
+ hair:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M4 14c0-6 4-10 8-10s8 4 8 10"/><path d="M4 14c1 2 2 3 4 3M20 14c-1 2-2 3-4 3M12 7v10"/></svg>',
+ eye:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>',
+ sym:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M12 3v18M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>',
+ body:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v8M7 11l5-2 5 2M9 21l3-5 3 5"/></svg>',
+ age:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M5 21c0-4 3-7 7-7s7 3 7 7"/></svg>',
+ nose:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M12 4v9c0 2-2 3-3 3M12 13c0 2 2 3 3 3"/></svg>'
+};
+
+function faceReticle(){return `<svg viewBox="0 0 300 300" width="230" height="230">
+  <path class="draw" d="M150 58 C108 58 86 96 86 150 C86 205 116 248 150 248 C184 248 214 205 214 150 C214 96 192 58 150 58Z" fill="none" stroke="#fff" stroke-width="2"/>
+  <path class="draw d2" d="M150 96 L150 172 M120 132 L120 150 M180 132 L180 150 M126 198 Q150 216 174 198" fill="none" stroke="#fff" stroke-width="2"/>
+  <g stroke="#1ed760" stroke-width="2" class="pop" style="animation-delay:1s;filter:drop-shadow(0 0 4px rgba(30,215,96,.6))"><path d="M40 40 L40 70 M40 40 L70 40"/><path d="M260 40 L260 70 M260 40 L230 40"/><path d="M40 260 L40 230 M40 260 L70 260"/><path d="M260 260 L260 230 M260 260 L230 260"/></g></svg>`;}
+
+function headPath(photo){return photo
+ ? `<clipPath id="hc"><path d="M150 30 C108 30 86 70 86 120 C86 150 92 170 104 186 C100 196 96 214 96 232 L204 232 C204 214 200 196 196 186 C208 170 214 150 214 120 C214 70 192 30 150 30Z"/></clipPath><image href="${photo}" x="40" y="10" width="220" height="250" clip-path="url(#hc)" preserveAspectRatio="xMidYMid slice"/>`
+ : `<path d="M150 30 C108 30 86 70 86 120 C86 150 92 170 104 186 C100 196 96 214 96 232 L204 232 C204 214 200 196 196 186 C208 170 214 150 214 120 C214 70 192 30 150 30Z" fill="#0e0e10"/>`;}
+
+function faceAngles(photo){return `<svg viewBox="0 0 300 270" width="240" height="216">${headPath(photo)}
+  <g fill="none" stroke="#fff" stroke-width="1.3" opacity=".85"><line class="draw" x1="30" y1="85" x2="270" y2="85"/><line class="draw d2" x1="30" y1="140" x2="270" y2="140"/><line class="draw d3" x1="30" y1="195" x2="270" y2="195"/></g>
+  <g fill="none" stroke="#1ed760" stroke-width="2"><path class="draw d2" d="M200 150 L150 200 L222 204"/></g>
+  <g fill="none" stroke="#f0a52a" stroke-width="2"><path class="draw d3" d="M150 100 L196 132 L150 162"/></g>
+  <text class="pop deg" x="206" y="196" fill="#1ed760" style="animation-delay:1.1s">118°</text>
+  <text class="pop deg" x="158" y="132" fill="#f0a52a" style="animation-delay:1.3s">79°</text></svg>`;}
+
+function ratioGrid(){return `<svg viewBox="0 0 300 270" width="240" height="216">${headPath(null)}
+  <g stroke="#fff" stroke-width="1" opacity=".8" fill="none"><line class="draw" x1="150" y1="30" x2="150" y2="240"/>
+   <line class="draw d2" x1="60" y1="85" x2="240" y2="85"/><line class="draw d2" x1="60" y1="140" x2="240" y2="140"/><line class="draw d3" x1="60" y1="195" x2="240" y2="195"/>
+   <line class="draw d3" x1="105" y1="55" x2="105" y2="220"/><line class="draw d3" x1="195" y1="55" x2="195" y2="220"/></g>
+  <g class="pop" style="animation-delay:1s" fill="#7d7d83" font-size="11"><text x="246" y="88">1.0</text><text x="246" y="143">1.618</text><text x="246" y="198">1.0</text></g></svg>`;}
+
+function haloBars(){const d=[['Dating & relationships',80],['Trust & likability',65],['Hiring & promotions',35],['Income',30]];
+ return `<div class="bars">${d.map((it,i)=>`<div class="barrow"><div class="lab"><b>${it[0]}</b><span>${it[1]}%</span></div><div class="track"><div class="fill" style="width:${it[1]}%;animation-delay:${i*0.12}s"></div></div></div>`).join('')}</div>`;}
+
+function datingPyramid(){const d=[['Bottom 50%',2],['Average',6],['Above avg',13],['Top 20%',26],['Top 5%',39]];
+ return `<div style="width:100%"><div style="display:flex;align-items:flex-end;gap:10px;height:170px;justify-content:center">${d.map((x,i)=>`
+   <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+     <div style="width:38px;height:${x[1]*4}px;border-radius:6px 6px 0 0;background:${i>=3?'#1ed760':'#2a2a30'};transform-origin:bottom;transform:scaleY(0);animation:gy .8s ease ${i*0.1}s forwards"></div>
+     <div style="font-size:10px;color:#7d7d83;width:46px;text-align:center;line-height:1.2">${x[0]}</div></div>`).join('')}</div>
+   <style>@keyframes gy{to{transform:scaleY(1)}}</style>
+   <div style="text-align:center;font-size:12px;color:#7d7d83;margin-top:14px">avg weekly matches, by looks tier</div></div>`;}
+
+function controllable(){const y=['Skin & complexion','Hair & hairline','Body fat & jaw','Grooming & brows','Style & posture','Expression'];
+ return `<div class="ctrl">${y.map(t=>`<div class="crow y"><span class="ck">✓</span>${t}<span style="margin-left:auto;font-size:11px;color:#1ed760">yours</span></div>`).join('')}
+  <div class="crow n"><span class="ck">✕</span>Bone structure<span style="margin-left:auto;font-size:11px;color:#7d7d83">fixed</span></div></div>`;}
+
+function potentialGraph(now,ceil,withDate){return `<svg viewBox="0 0 320 210" width="300" height="196">
+  <line x1="34" y1="18" x2="34" y2="180" stroke="#222227"/><line x1="34" y1="180" x2="306" y2="180" stroke="#222227"/>
+  <path class="draw" d="M40 ${now?165:168} C120 ${now?158:160} 175 130 ${300} ${ceil?45:48}" fill="none" stroke="#1ed760" stroke-width="2.5"/>
+  <g class="pop" style="animation-delay:1.1s"><circle cx="44" cy="${now?164:166}" r="5" fill="#fff"/><text x="52" y="${now?160:162}" fill="#fff" font-size="12">${now?('you · '+now):'you now'}</text>
+   <circle cx="298" cy="${ceil?46:48}" r="6" fill="#1ed760"/><text x="${ceil?206:188}" y="38" fill="#1ed760" font-size="12" font-weight="700">${ceil?('ceiling · '+ceil):'your potential'}</text></g>
+  ${withDate?`<text class="pop" x="40" y="200" fill="#7d7d83" font-size="11" style="animation-delay:1.3s">today</text><text class="pop" x="250" y="200" fill="#1ed760" font-size="11" font-weight="700" style="animation-delay:1.3s">Sep 13</text>`:''}</svg>`;}
+
+function motVsDisc(){const arcs=(xs,dx,col)=>xs.map(x=>`<path d="M${x} 40 q${dx} ${-dx*1.6} ${dx*2} 0" fill="none" stroke="${col}" stroke-width="2"/>`).join('');
+ return `<svg viewBox="0 0 320 210" width="300" height="196">
+   <text x="6" y="18" fill="#fff" font-size="13" font-weight="700" letter-spacing="1">MOTIVATION</text>
+   <g class="draw" transform="translate(0,28)">${arcs([16,64,120,186],14,'#fff')}<line x1="16" y1="40" x2="232" y2="40" stroke="#fff" stroke-width="2"/><line x1="232" y1="40" x2="305" y2="40" stroke="#3a3a3e" stroke-width="2" stroke-dasharray="4 4"/></g>
+   <text x="6" y="142" fill="#1ed760" font-size="13" font-weight="700" letter-spacing="1">DISCIPLINE</text>
+   <g class="draw d2" transform="translate(0,152)">${arcs([16,48,80,112,144,176,208,240,272],10,'#1ed760')}<line x1="16" y1="40" x2="305" y2="40" stroke="#1ed760" stroke-width="2"/></g></svg>`;}
+
+function climb(){return `<svg viewBox="0 0 320 210" width="300" height="196">
+  <polyline class="draw" points="20,182 45,164 65,172 90,144 110,158 140,116 165,134 195,92 220,114 250,68 280,92 300,40" fill="none" stroke="#fff" stroke-width="2.5"/>
+  <text x="14" y="200" fill="#fff" font-size="11">START</text>
+  <g class="pop" style="animation-delay:1s"><circle cx="140" cy="116" r="4" fill="#ff4b4b"/><text x="116" y="108" fill="#ff4b4b" font-size="10">MOST QUIT</text><text x="268" y="34" fill="#1ed760" font-size="11" font-weight="700">FINISH</text></g></svg>`;}
+
+function scoreRing(val,col){const r=90,c=2*Math.PI*r,off=c*(1-val/100);
+ return `<div class="ringbox"><svg viewBox="0 0 206 206" width="206" height="206"><circle cx="103" cy="103" r="${r}" stroke="#1c1c20" stroke-width="13" fill="none"/>
+   <circle id="sr" cx="103" cy="103" r="${r}" stroke="${col}" stroke-width="13" fill="none" stroke-linecap="round" transform="rotate(-90 103 103)" stroke-dasharray="${c}" stroke-dashoffset="${c}" style="transition:stroke-dashoffset 1.2s ease;filter:drop-shadow(0 0 7px ${col})" data-off="${off}"/></svg>
+   <div class="ctr"><b id="srn" style="color:${col}">0</b><span>out of 100</span></div></div>`;}
+
+const REVIEWS=[
+ {n:'Marcus, 24',b:'reviews/g1-before.jpg',a:'reviews/g1-after.jpg',sb:53,sa:71,q:'Lost the weight, fixed my skin, finally got a real haircut. Girls actually text first now.'},
+ {n:'Andre, 22',b:'reviews/g2-before.jpg',a:'reviews/g2-after.jpg',sb:51,sa:70,q:'Dropped 12kg, grew the beard out and got a clean lineup. The confidence is unreal.'},
+ {n:'Kevin, 25',b:'reviews/g3-before.jpg',a:'reviews/g3-after.jpg',sb:48,sa:71,q:'Skin cleared up, ditched the glasses, fixed the hair. People treat me completely differently.'},
+ {n:'Mateo, 28',b:'reviews/g4-before.jpg',a:'reviews/g4-after.jpg',sb:56,sa:74,q:'Lost 20kg and the jawline was hiding under there the whole time.'},
+ {n:'Rohan, 23',b:'reviews/g5-before.jpg',a:'reviews/g5-after.jpg',sb:49,sa:68,q:"Fixed my skin and brows first, then the hair. I don't even recognise my old photos."},
+];
+function reviewsCarousel(){const card=r=>`<div class="rvcard"><div class="rvphotos"><div class="rvph"><img src="${r.b}"><span class="lbl">BEFORE</span></div><div class="rvph"><img src="${r.a}"><span class="lbl a">AFTER</span></div></div><div class="rvbar"><div class="rvscore"><b>${r.sb}</b><span class="ar">&rarr;</span><b class="g">${r.sa}</b></div><div class="rvname">${r.n} &middot; <span class="g">+${r.sa-r.sb}</span></div></div><div class="rvq"><span class="st">&#9733;&#9733;&#9733;&#9733;&#9733;</span> &ldquo;${r.q}&rdquo;</div></div>`;
+ const list=REVIEWS.map(card).join('');return `<div class="revwrap"><div class="revtrack">${list}${list}</div></div>`;}
+
+const REPORT=[['Overall',67,0],['Jawline',72,1],['Cheekbones',64,1],['Canthal tilt',70,1],['Skin quality',61,1],['Symmetry',74,1],['Hairline',80,1],['Nose harmony',66,1],['Lips',69,1],['Masculinity',71,1]];
+function fullReport(){return `<div style="width:100%">
+  <div style="font-size:13px;color:#7d7d83;margin-bottom:10px;line-height:1.4">You flagged <span style="color:#fff">${goalsPhrase(2)}</span> — both scored below.</div>
+  <div class="metric" style="border-color:#fff"><div class="mn" style="font-weight:700">Overall Looks Score</div><div class="mv" style="color:#f0a52a">67</div></div>
+  ${REPORT.slice(1).map(m=>m[0]==='Skin quality'?`<div class="metric"><div class="mn">Skin quality <span style="color:#7d7d83;font-weight:400;font-size:11.5px">· your lowest, most fixable</span></div><div class="mv" style="color:${band6(m[1])}">${m[1]}</div></div>`:`<div class="metric lock"><div class="mn">${m[0]}</div><div style="display:flex;align-items:center"><div class="mv">••</div><span class="lk"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span></div></div>`).join('')}</div>`;}
+
+const TIERS=[{nm:'Annual',pr:'$39.99/yr',meta:'<span style="color:#1ed760">$0.77/week</span> · <span class="strike">$83.88</span> <span class="save">Save 52%</span>',badge:'MOST POPULAR',cta:'Start my plan'},
+ {nm:'Lifetime',pr:'$69.99',meta:'Pay once · yours forever',cta:'Unlock for life'}];
+
+const S=[
+ {k:'cold',ph:'Hook',h:'You already have a number.',s:"You just can't see it yet — your real Looks Score, out of 100. Free, no signup.",cta:'Reveal my number'},
+ {k:'anim',c:'A1_Halo',ph:'Hook',cta:'Show me how'},
+ {k:'anim',c:'A2_Dating',ph:'Hook',cta:'Can I move up?'},
+ {k:'anim',c:'A5_Loneliest',ph:'Hook',cta:'Not me'},
+ {k:'anim',c:'A7_LooksPay',ph:'Hook',cta:'Continue'},
+ {k:'anim',c:'A3_Fixable',ph:'Hook',cta:"Let's find mine"},
+ {k:'gender',ph:'You',kick:'Question 1',h:'Who are we scoring?',s:'We score male and female faces on different models.',cta:'Continue'},
+ {k:'age',ph:'You',kick:'Question 2',h:'How old are you?',s:'Your age sets your potential window.',cta:'Continue'},
+ {k:'goals',ph:'You',kick:'Question 3',h:'What do you want to fix?',s:'Pick all that apply — this shapes your plan.',data:[['Jawline','jaw'],['Skin','skin'],['Hair','hair'],['Eyes','eye'],['Symmetry','sym'],['Body','body']],cta:'Continue'},
+ {k:'goals',ph:'You',kick:'The mirror test',h:'What do you see first in your photos?',s:'Be honest — this stays private.',data:[['Weak jaw','jaw'],['Tired eyes','eye'],['Bad skin','skin'],['Hairline','hair'],['Looks older','age'],['Nose','nose']],cta:'Continue'},
+ {k:'slider',ph:'You',kick:'Question 5',h:'Do your looks hold back your confidence?',s:"Whatever's pulling your number down is mostly fixable — that's the part we measure.",ends:['Not really','A lot'],cta:'Continue'},
+ {k:'slider',ph:'You',kick:'Question 6',h:'How often do you avoid photos or mirrors?',s:'No judgment — this is the one most guys flinch at. Naming it is how the number starts to move.',ends:['Never','Often'],cta:'Continue'},
+ {k:'rating',ph:'You',kick:'Question 7',h:'Rate your own looks.',s:'Be honest. People who underrate themselves usually score higher than they think.',cta:'Lock in my guess'},
+ {k:'potential',ph:'Why',kick:'The gap',h:"Your gap is bigger than you think.",s:"You just guessed your own number. We'll show you the real one — and how far it can climb.",cta:'Show me the gap'},
+ {k:'anim',c:'A8_Compound',ph:'Why',cta:'Continue'},
+ {k:'faceangles',ph:'Why',kick:'It can be measured',h:"It's math. Not opinion.",s:'A face is angles, ratios and proportions — all scorable.',cta:'Continue'},
+ {k:'ratio',ph:'Why',kick:'Our method',h:'Same face. Same score. Every time.',s:'We map 68 points the way a clinician would — neutral, repeatable. No flattery, no random results.',cta:'Continue'},
+ {k:'reviews',ph:'Why',kick:'10,000+ scans',h:'They already ascended.',cta:'Scan my face — free score'},
+ {k:'scanintro',ph:'Scan',kick:'Front + side',h:'Time to scan your face.',s:'Two photos — front and side, good light, neutral face. 60 seconds, and you get your real Looks Score plus the exact fixes.',cta:'Start scan'},
+ {k:'perm',ph:'Scan',h:'Camera access',s:'We need your camera to scan your face. Photos are analyzed privately and deleted after — never sold, never posted.',cta:'Enable camera'},
+ {k:'capture',ph:'Scan',kick:'1 of 2 · front',h:'Look straight ahead.',cta:'Capture front'},
+ {k:'capture',ph:'Scan',kick:'2 of 2 · side',h:'Turn to your side.',cta:'Complete scan'},
+ {k:'analyzing',ph:'Scan',kick:'Analyzing',h:'Reading your face…',cta:'See my score'},
+ {k:'reveal',ph:'Result',kick:'Your looks score',h:'',cta:'Close the 1.4 gap'},
+ {k:'anim',c:'A9_BeforeAfter',ph:'Result',cta:'Show my trajectory'},
+ {k:'potplan',ph:'Result',kick:'Your plan',h:'You’re a 67. You can hit 81.',s:'Follow your plan and reach your ceiling by Sep 13.',cta:'Show me the breakdown'},
+ {k:'report',ph:'Result',h:'Your face, broken down.',s:'Your score and ceiling are free. Below: the 10 sub-scores behind them — including your lowest, Skin at 61.',cta:'Unlock my full report'},
+  {k:'paywall',ph:'Unlock',h:''},
+ {k:'confirmed',ph:'Unlocked',h:''},
+ {k:'reportfull',ph:'Unlocked',kick:'Your full report',h:"Here's everything."},
+ {k:'motdisc',ph:'Plan',kick:'How results happen',h:"Motivation fades.\nDiscipline doesn't.",s:'So we hand you the discipline part — a small daily plan you actually follow.',cta:'See my plan'},
+ {k:'plan',ph:'Plan',kick:'Built for your 2 lowest · Skin 61 & Cheekbones 64',h:'Your plan to 81.'},
+ {k:'notif',ph:'Plan',h:'We catch you before you slip.'},
+ {k:'home',ph:'Home',h:''},
+];
+
+function esc(t){return (t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).replace(/\n/g,'<br>');}
+
+let homeTab=0, SELF=5, GOALS=[];
+const TASKS=['Mewing — 10 min','AM skincare routine','8 h sleep tracked','Posture drill','Sun + 2 L water'];
+function band6(v){return v<50?'#ff4b4b':v<=70?'#f0a52a':'#1ed760';}
+function headHTML(s){return `${s.kick?`<div class="kicker">${esc(s.kick)}</div>`:''}${s.h?`<h2 class="h ${/[a-z]/.test(s.h)&&s.h.length>26?'mix':''}">${esc(s.h)}</h2>`:''}${s.s?`<p class="s">${esc(s.s)}</p>`:''}`;}
+function confirmedScreen(s){return `<div class="scr"><div class="vis" style="flex:1;flex-direction:column;gap:18px"><div class="unlock"><svg viewBox="0 0 120 120" width="108" height="108"><circle cx="60" cy="60" r="52" fill="none" stroke="#1ed760" stroke-width="5" class="draw" style="stroke-dasharray:340;stroke-dashoffset:340"/><path d="M38 62 L54 78 L84 44" fill="none" stroke="#1ed760" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="draw" style="stroke-dasharray:90;stroke-dashoffset:90;animation-delay:.45s"/></svg></div><h2 class="h" style="text-align:center">YOU'RE IN.</h2><p class="s" style="text-align:center;margin-top:0">Your full report and 90-day plan are unlocked — and your first free re-scan is already booked for Day 10.</p></div><div class="foot"><button class="cta" onclick="next()">See my full report</button><div class="cap" style="margin-top:10px">Plan active · manage or cancel anytime in Settings</div></div></div>`;}
+function reportFace(){const ph=PHOTO;const hp="M160 28 C116 28 94 72 94 124 C94 158 102 180 116 198 C110 212 106 234 106 252 L214 252 C214 234 210 212 204 198 C218 180 226 158 226 124 C226 72 204 28 160 28Z";
+ return `<svg viewBox="0 0 320 296" width="100%" height="286">
+  ${ph?`<clipPath id="rc"><path d="${hp}"/></clipPath><image href="${ph}" x="50" y="4" width="220" height="272" clip-path="url(#rc)" preserveAspectRatio="xMidYMid slice" opacity=".92"/>`:`<path d="${hp}" fill="#0e0e10"/>`}
+  <g stroke="#fff" stroke-width="1" opacity=".4" fill="none"><line class="draw" x1="74" y1="90" x2="246" y2="90" style="stroke-dasharray:180;stroke-dashoffset:180"/><line class="draw" x1="74" y1="148" x2="246" y2="148" style="stroke-dasharray:180;stroke-dashoffset:180;animation-delay:.2s"/><line class="draw" x1="74" y1="206" x2="246" y2="206" style="stroke-dasharray:180;stroke-dashoffset:180;animation-delay:.4s"/><line class="draw" x1="160" y1="32" x2="160" y2="248" style="stroke-dasharray:220;stroke-dashoffset:220;animation-delay:.3s"/></g>
+  <g fill="none" stroke="#1ED760" stroke-width="2"><path class="draw" d="M206 150 L160 208 L234 212" style="stroke-dasharray:240;stroke-dashoffset:240;animation-delay:.6s"/></g>
+  <g fill="none" stroke="#F0A52A" stroke-width="2"><path class="draw" d="M120 116 L152 126" style="stroke-dasharray:60;stroke-dashoffset:60;animation-delay:.8s"/></g>
+  <text x="210" y="204" class="deg" fill="#1ED760">118&#176;</text>
+  <text x="116" y="110" class="deg" fill="#F0A52A">+4&#176;</text>
+  <g class="pop" style="animation-delay:1s"><line x1="246" y1="148" x2="266" y2="148" stroke="#3A3A3E"/><text x="270" y="145" class="cl">Cheekbones</text><text x="270" y="159" class="clv" fill="#F0A52A">64</text></g>
+  <g class="pop" style="animation-delay:1.15s"><line x1="74" y1="206" x2="54" y2="206" stroke="#3A3A3E"/><text x="50" y="203" class="cl" text-anchor="end">Jawline</text><text x="50" y="217" class="clv" fill="#1ED760" text-anchor="end">72</text></g>
+ </svg>`;}
+function reportFull(s){return `<div class="scr">${headHTML(s)}<div style="font-size:12.5px;color:#7d7d83;margin:-4px 0 8px;line-height:1.4">Built from your 2 scans + 7 answers — this profile exists only for you.</div><div style="flex:0 0 auto;padding:2px 0">${reportFace()}</div><div class="statrow"><div class="statchip"><b style="color:#f0a52a">67</b><span>Looks Score</span></div><div class="statchip"><b style="color:#1ed760">81</b><span>Potential</span></div></div><div class="hint" style="text-align:center;margin:-6px 0 10px">= <b style="color:#fff">6.7</b> on the PSL scale · ceiling <b style="color:#1ed760">8.1</b></div><div class="hint" style="margin:2px 2px 7px;font-weight:600;color:#fff">Your 10 sub-scores · now unlocked</div>${REPORT.slice(1).map(m=>`<div class="metric"><div class="mn">${m[0]}</div><div class="mv" style="color:${band6(m[1])}">${m[1]}</div></div>`).join('')}<div class="repcols" style="margin-top:10px"><div class="repcol"><div class="rh" style="color:#1ed760">Halos</div>Hairline · Symmetry · Jaw</div><div class="repcol"><div class="rh" style="color:#f0a52a">Focus</div>Skin · Cheekbones</div></div><div class="foot"><button class="cta" onclick="next()">Build my 90-day plan</button></div></div>`;}
+function planBanner(){return `<div class="planbanner"><div class="pd">Day 1 of 90</div><div class="pg">Reach Potential 81 by Sep 13</div><div class="ptrack"><div class="pfill" style="width:1%"></div>${[10,20,30,40,50,60,70,80,90].map((d,i)=>`<span class="mile ${i===0?'next':''}" style="left:${(d/90*100).toFixed(1)}%"></span>`).join('')}</div><div class="milelbl">Your next free re-scan is booked — Day 10. Hit your tasks and that's when the number moves.</div></div>`;}
+function taskList(){return TASKS.map(t=>`<div class="task" onclick="taskTick(this)"><span class="tb"></span>${t}</div>`).join('');}
+function rewardBanner(){return `<div class="reward" id="planReward" style="display:none">Perfect day! Streak +1 · +10 pts toward your Day-10 re-scan</div>`;}
+function taskTick(el){el.classList.toggle('done');const w=el.closest('.scr')||document;const all=w.querySelectorAll('.task').length;const done=w.querySelectorAll('.task.done').length;const r=w.querySelector('#planReward');if(r)r.style.display=(all>0&&done===all)?'block':'none';}
+function planScreen(s){return `<div class="scr">${headHTML(s)}${planBanner()}<div class="statrow" style="margin-top:10px"><div class="statchip"><b style="color:#1ed760">1</b><span>Days ascending</span></div><div class="statchip"><b style="color:#fff">0/5</b><span>Today's tasks</span></div><div class="statchip"><b style="color:#f0a52a">10</b><span>To re-scan</span></div></div><div class="hint" style="margin:2px 2px 8px">Today · this week's focus: skin &amp; cheekbones</div>${taskList()}${rewardBanner()}<div class="foot"><button class="cta" onclick="next()">Start Day 1</button></div></div>`;}
+function bellArt(){return `<svg viewBox="0 0 120 120" width="92" height="92"><path class="draw" d="M60 26 C44 26 36 38 36 56 C36 74 28 82 24 86 L96 86 C92 82 84 74 84 56 C84 38 76 26 60 26Z" fill="none" stroke="#fff" stroke-width="3"/><path class="draw" d="M50 92 a10 10 0 0 0 20 0" fill="none" stroke="#fff" stroke-width="3" style="animation-delay:.4s"/></svg>`;}
+function notifScreen(s){return `<div class="scr">${headHTML(s)}<p class="s">You'll miss days — everyone does. We get you back the next morning, before a skipped day becomes a skipped week.</p><div class="vis">${bellArt()}</div><div class="foot"><button class="cta" onclick="next()">Keep me on track</button></div><div class="ov" id="ov"><div class="osd"><div class="tp"><b>"APEX" Would Like to Send You Notifications</b><p>One nudge a day — and we'll tell you the morning your free re-scan unlocks.</p></div><div class="bt"><button onclick="document.getElementById('ov').remove()">Don't Allow</button><button onclick="next()">Allow</button></div></div></div></div>`;}
+function programsTab(){const ps=[['Clear Skin','21 days',0,'#1ed760',1],['Jawline & Definition','28 days',0,'#1ed760',1],['Hair & Hairline','ongoing',0,'#7d7d83',0],['Grooming & Brows','14 days',0,'#7d7d83',0],['Confidence & Presence','30 days',0,'#7d7d83',0]];return `<div class="kicker">Programs · matched to your focus areas</div>${ps.map(p=>`<div class="prog2"><div class="p2t"><b>${p[0]}${p[4]?' <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:#1ed760;border:1px solid #1ed760;border-radius:10px;padding:1px 6px;margin-left:7px;vertical-align:1.5px">START HERE</span>':''}</b><span>${p[1]}</span></div><div class="p2track"><div class="p2fill" style="width:${p[2]}%;background:${p[3]}"></div></div></div>`).join('')}`;}
+function coachTab(){return `<div class="kicker">AI Coach · ask anything, included</div><div class="chat"><div class="cb user">Rate my new haircut</div><div class="cb ai">Solid upgrade — the texture balances your forehead. Tidy the neckline and you're a clean 7.</div></div><div class="chips"><span class="chip2">What should I fix first?</span><span class="chip2">Rate this outfit</span><span class="chip2">Scan my skincare</span></div><div class="hint" style="margin-top:10px">Text advice is unlimited. Photo re-rates use a scan (free every 10 days, or $2.99).</div>`;}
+function homeContent(t){
+ if(t===0)return `<div class="kicker">Day 1 of 90</div><div class="scorebig"><div><div class="lbl2">Looks Score</div><div class="bn" style="color:#f0a52a">67 <svg width="12" height="12" viewBox="0 0 12 12" fill="#1ed760" style="vertical-align:1px"><path d="M6 2.5l3.6 6.2H2.4z"/></svg></div></div><div style="text-align:right"><div class="lbl2">Potential</div><div class="bn" style="color:#1ed760">81</div></div></div><div class="gapbar"><div class="gapfill" style="width:83%"></div></div><div class="hint" style="margin-top:8px">+14 to your ceiling · free re-scan every 10 days</div><svg viewBox="0 0 320 84" width="100%" height="80" style="margin-top:12px"><polyline points="12,66 76,64 140,62 204,55 268,47 308,38" fill="none" stroke="#1ed760" stroke-width="2.5" class="draw" style="stroke-dasharray:400;stroke-dashoffset:400"/><circle cx="12" cy="66" r="4" fill="#fff"/><text x="8" y="80" class="cap2">wk1</text><text x="286" y="80" class="cap2">goal</text></svg><button class="cta" style="margin-top:12px" onclick="setHomeTab(1)">Start today's plan</button>`;
+ if(t===1)return `<div class="kicker">Today · Day 1, ascending</div>${taskList()}${rewardBanner()}<div class="hint" style="margin-top:8px">Complete all 5 to lock today and keep the streak alive.</div>`;
+ if(t===2)return `<div class="kicker">Your progress</div><svg viewBox="0 0 320 130" width="100%" height="126"><line x1="20" y1="104" x2="306" y2="104" stroke="#222227"/><polyline points="20,84 90,80 160,70 230,58 300,44" fill="none" stroke="#2a2a30" stroke-width="2" stroke-dasharray="5 5"/><circle cx="20" cy="84" r="5" fill="#f0a52a"/><text x="12" y="122" class="cap2">day1 · 67</text><circle cx="300" cy="44" r="5" fill="#1ed760"/><text x="244" y="38" class="cap2g">day90 · 81</text></svg><div class="hint">Free re-scan every 10 days — next on Day 10. Hit your tasks to make the line climb.</div><div class="iaptile" style="margin-top:12px"><div><b>Re-scan now</b><div class="ip">$2.99 · or free on Day 10</div></div><span class="lk"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1ed760" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 0 18.5 16"/><path d="M20 4.5V11h-6.5"/></svg></span></div>`;
+ if(t===3)return programsTab();
+ return coachTab();}
+function homeScreen(){const tabs=[
+  ['Score','<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 12l3.6-2.6"/></svg>'],
+  ['Plan','<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5l1.6 1.6L8.6 5M4 13.5l1.6 1.6L8.6 12M12 7h8M12 14h8"/></svg>'],
+  ['Scan','<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M15.5 4H18a2 2 0 0 1 2 2v2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M8.5 20H6a2 2 0 0 1-2-2v-2.5"/><circle cx="12" cy="12" r="2.6"/></svg>'],
+  ['Programs','<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>'],
+  ['Coach','<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 19 15H10l-4 3.5V6.5A1.5 1.5 0 0 1 5 5Z"/></svg>']
+];return `<div class="scr" style="padding-bottom:0"><div style="flex:1 1 auto"><div class="homehead">APEX</div><div id="homebody">${homeContent(homeTab)}</div></div><div class="tabbar">${tabs.map((t,i)=>`<div class="tab ${i===homeTab?'on':''}" onclick="setHomeTab(${i})"><div class="ic">${t[1]}</div>${t[0]}</div>`).join('')}</div></div>`;}
+function setHomeTab(i){homeTab=i;render();}
+
+function build(s){
+  const head=`${s.kick?`<div class="kicker">${esc(s.kick)}</div>`:''}${s.h?`<h2 class="h ${/[a-z]/.test(s.h)&&s.h.length>26?'mix':''}">${esc(s.h)}</h2>`:''}${s.s?`<p class="s">${esc(s.s)}</p>`:''}`;
+  const foot=s.cta?`<div class="foot"><button class="cta" onclick="next()">${esc(s.cta)}</button></div>`:'';
+  let vis='';
+  switch(s.k){
+   case 'cold': return `<div class="scr"><div class="vis" style="flex:1">${faceReticle()}</div><h2 class="h" style="text-align:center">${esc(s.h)}</h2><p class="s" style="text-align:center;margin-top:8px">${esc(s.s||'')}</p><div class="foot"><button class="cta" onclick="next()">${esc(s.cta||'Continue')}</button><div class="cap" style="margin-top:10px">No account · no card</div></div></div>`;
+   case 'halo': vis=haloBars()+(s.cap?`<div class="cap">${esc(s.cap)}</div>`:''); break;
+   case 'faceangles': vis=faceAngles(null); break;
+   case 'ratio': vis=ratioGrid(); break;
+   case 'pyramid': vis=datingPyramid(); break;
+   case 'controllable': vis=controllable(); break;
+   case 'potential': vis=potentialGraph(null,null,false); break;
+   case 'motdisc': vis=motVsDisc(); break;
+   case 'climb': vis=climb(); break;
+   case 'gender': vis=`<div class="gender"><div class="gcard" onclick="pickCard(this)"><div class="gl">Male</div></div><div class="gcard" onclick="pickCard(this)"><div class="gl">Female</div></div></div>`; break;
+   case 'age': vis=`<div class="slwrap"><div class="bignum" id="ageval">24</div><input type="range" min="14" max="70" value="24" oninput="document.getElementById('ageval').textContent=this.value" style="margin-top:22px"><div class="slends"><span>14</span><span>70</span></div></div>`; break;
+   case 'goals': vis=`<div class="tiles">${s.data.map(t=>`<div class="tile" onclick="pickGoal(this,'${t[0]}')"><div class="ic">${ic[t[1]]||''}</div><div class="tl">${t[0]}</div></div>`).join('')}</div>`; break;
+   case 'slider': vis=`<div class="slwrap"><div class="slnow" id="slv">${s.ends[0]}</div><input type="range" min="0" max="100" value="50" oninput="document.getElementById('slv').textContent=this.value<33?'${s.ends[0]}':this.value<66?'Sometimes':'${s.ends[1]}'"><div class="slends"><span>${s.ends[0]}</span><span>${s.ends[1]}</span></div></div>`; break;
+   case 'rating': vis=`<div class="slwrap"><div class="bignum" id="rtv" style="color:#f0a52a">5</div><input type="range" min="1" max="10" value="5" oninput="rt(this.value)" style="margin-top:22px"><div class="slends"><span>1</span><span>10</span></div></div>`; break;
+   case 'reviews': vis=reviewsCarousel(); break;
+   case 'scanintro': vis=faceReticle()+'<div style="display:flex;gap:16px;justify-content:center;margin-top:18px;font-size:11px;color:#7d7d83"><span style="display:flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7d7d83" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Private</span><span style="display:flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7d7d83" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6.5 7l1 12a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1l1-12"/></svg>Auto-deleted</span><span style="display:flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7d7d83" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 10.7a2 2 0 0 0 2.8 2.8M9.4 5.2A9 9 0 0 1 21 12a14 14 0 0 1-2.2 3M6.1 6.1A13.8 13.8 0 0 0 3 12a9 9 0 0 0 11 6.9"/></svg>Never shared</span></div>'; break;
+   case 'perm': return `<div class="scr">${head}<div class="vis">${faceReticle()}</div><div class="foot"><button class="cta" onclick="next()">${esc(s.cta)}</button></div><div class="ov" id="ov"><div class="osd"><div class="tp"><b>“APEX” Would Like to Access the Camera</b><p>To scan and score your face.</p></div><div class="bt"><button onclick="document.getElementById('ov').remove()">Don't Allow</button><button onclick="next()">Allow</button></div></div></div>`;
+   case 'capture': vis=`<div class="vf" onclick="document.getElementById('filein').click()">${PHOTO?`<img src="${PHOTO}">`:`<div class="face"></div>`}<div class="scanl"></div></div>`; break;
+   case 'analyzing': return `<div class="scr">${head}<div class="vis" style="justify-content:flex-start;padding-top:6px"><div style="margin-bottom:6px">${faceAngles(PHOTO)}</div><div class="anbox" id="anbox"></div><div style="text-align:center;font-size:12px;color:#7d7d83;margin-top:12px">You called yourself a <b style="color:#fff">${SELF}</b>/10. The real number's next.</div></div><div class="foot"><button class="cta" id="anCta" onclick="next()" disabled>${esc(s.cta)}</button></div></div>`;
+   case 'reveal': return `<div class="scr"><h2 class="h" style="text-align:center;margin:10px 0 2px">You scored 67.</h2><div style="text-align:center;font-size:12.5px;color:#7d7d83;margin-bottom:4px">You guessed <b style="color:#fff">${SELF}</b>/10 — your real floor is <b style="color:#f0a52a">6.7</b>. Free, no paywall.</div><div class="vis" style="flex:1;gap:12px">${scoreRing(67,'#f0a52a')}<div class="pop" style="animation-delay:1.1s;text-align:center"><div style="font-size:13px;color:#7d7d83">your ceiling</div><div style="font-family:'Archivo',sans-serif;font-size:24px;font-weight:900;color:#1ed760">81</div><div style="font-size:12px;color:#7d7d83;margin-top:4px">reach it by Sep 13 · 90 days</div></div><div class="pop" style="animation-delay:1.55s;text-align:center;max-width:300px"><div style="font-family:'Archivo',sans-serif;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:-.3px">That's your floor — not your face.</div><div style="font-size:12px;color:#7d7d83;margin-top:6px;line-height:1.4">You're 14 points under your ceiling — most of it is skin, hair, body &amp; grooming, the part nobody's working on yet.</div></div></div>${foot}`;
+   case 'potplan': vis='<iframe class="glowframe" src="glow/glowup.html" title="Your glow-up curve" scrolling="no"></iframe>'; break;
+   case 'report': vis=fullReport(); break;
+   case 'anim': return animScreen(s);
+   case 'paywall': return paywall();
+   case 'confirmed': return confirmedScreen(s);
+   case 'reportfull': return reportFull(s);
+   case 'plan': return planScreen(s);
+   case 'notif': return notifScreen(s);
+   case 'home': return homeScreen();
+  }
+  return `<div class="scr">${head}<div class="vis">${vis}</div>${foot}</div>`;
+}
+
+function paywall(){return `<div class="scr"><div class="kicker">Your report is built</div><h2 class="h">See your full report + 90-day plan.</h2>
+  <p class="s" style="margin-top:9px">You came to fix ${goalsPhrase(2)}. This is the plan that closes the gap from 6.7 to your 8.1 ceiling — about 11¢ a day.</p>
+  <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px">${['All 10 sub-scores','Your weakest-link fix order','Your 90-day daily plan','Free re-scan every 10 days','AI coach — unlimited text'].map(x=>`<div style="display:flex;align-items:center;gap:9px;font-size:13px;color:#e8e8ea"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1ed760" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M4 12l5 5L20 6"/></svg>${x}</div>`).join('')}</div>
+  <div class="counter" style="margin-top:13px">41 unlocked in the last hour · join 10,000+ on their plan</div>
+  <div id="tiers">${TIERS.map((t,i)=>`<div class="tier ${i===0?'sel':''}" onclick="pickTier(${i})">${t.badge?`<span class="badge">${t.badge}</span>`:''}<div class="row"><div class="nm">${t.nm}</div><div class="pr">${t.pr}</div></div><div class="meta">${t.meta}</div></div>`).join('')}</div>
+  <div style="text-align:center;font-size:11px;color:var(--faint);margin-top:7px">Annual auto-renews at $39.99/yr · cancel anytime in 2 taps</div>
+  <div style="display:flex;align-items:center;gap:7px;justify-content:center;margin-top:10px;font-size:11.5px;color:var(--muted)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7d7d83" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Deterministic 68-point analysis · reproducible, not a vibe</div>
+  <div style="text-align:center;font-size:12.5px;color:var(--muted);line-height:1.45;margin:11px 2px 0">“Spent $200 on skincare that did nothing. This was $40 and finally told me what to fix — hit a 7 in two months.” <span style="color:#cfcfd3">— Daniel R., verified</span></div>
+  <div class="runway">Day 1 of 90 starts the moment you unlock. Sep 13 is your date — only if you start today.</div>
+  <div class="foot"><button class="cta" id="payc" onclick="next()">${TIERS[0].cta}</button><button class="sec">Cancel anytime in 2 taps · Restore</button></div></div>`;}
+
+/* sequential analysis */
+function startAnalyze(){
+  const box=document.getElementById('anbox'); if(!box) return;
+  const steps=[
+   {load:'Mapping 68 landmarks',finds:[['Defined brow ridge','#1ed760']]},
+   {load:'Measuring proportions',finds:[['Balanced facial thirds','#1ed760'],['Midface slightly long','#f0a52a']]},
+   {load:'Scoring skin & symmetry',finds:[['Strong symmetry','#1ed760'],['Skin texture: improvable','#f0a52a']]},
+   {load:'Calculating Looks Score',finds:[]},
+  ];
+  let t=300;
+  steps.forEach((st,i)=>{
+    setTimeout(()=>{ if(!document.getElementById('anbox'))return;
+      const row=document.createElement('div'); row.className='astep'; row.id='as'+i;
+      row.innerHTML=`<div class="ico"><div class="spin"></div></div><div class="body"><div class="ttl">${st.load}</div></div>`;
+      box.appendChild(row);
+    },t);
+    t+=750;
+    setTimeout(()=>{ const row=document.getElementById('as'+i); if(!row)return;
+      row.querySelector('.ico').innerHTML='<div class="chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#04240f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></div>';
+      const body=row.querySelector('.body');
+      st.finds.forEach((f,fi)=>{ const fd=document.createElement('div'); fd.className='find'; fd.style.animationDelay=(fi*0.18)+'s';
+        fd.innerHTML=`<span class="d" style="background:${f[1]}"></span>${f[0]}`; body.appendChild(fd); });
+    },t);
+    t+=520;
+  });
+  setTimeout(()=>{ const c=document.getElementById('anCta'); if(c)c.disabled=false; },t+200);
+}
+
+function animScreen(s){return `<div class="scr"><div class="vis" style="padding:0;align-items:stretch"><iframe class="animframe" src="glow/anim.html?c=${s.c}" title="${s.c}" scrolling="no"></iframe></div><div class="foot"><button class="cta" onclick="next()">${esc(s.cta||'Continue')}</button></div></div>`;}
+function glowSetup(fr){try{const d=fr.contentDocument;if(!d)return;const st=d.createElement('style');st.textContent='*:has(> button[aria-label*=\'Play\']){display:none!important;} #__bundler_loading{display:none!important;}';if(d.head)d.head.appendChild(st);const pb=[...d.querySelectorAll('button')].find(b=>(b.getAttribute('aria-label')||'').includes('Play'));if(pb)setTimeout(()=>{try{pb.click();}catch(e){}},80);}catch(e){}}
+function render(){
+  const s=S[idx];
+  document.getElementById('jump').selectedIndex=idx;
+  document.getElementById('cl').textContent=`Screen ${idx+1} / ${S.length} · ${s.ph}`;
+  document.getElementById('back').style.display=idx>0?'block':'none';
+  document.getElementById('progb').style.width=Math.min(100,(idx/(S.length-1))*100)+'%';
+  const st=document.getElementById('stage'); st.innerHTML=build(s); st.scrollTop=0;
+  if(s.k==='goals'){const gc=st.querySelector('.foot .cta'); if(gc)gc.disabled=true;}
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('[data-off]').forEach(c=>c.style.strokeDashoffset=c.getAttribute('data-off'));
+    const srn=document.getElementById('srn'); if(srn){let n=0;const t=setInterval(()=>{n+=2;if(n>=67){n=67;clearInterval(t);}srn.textContent=n;},22);}
+  });
+  if(s.k==='analyzing') startAnalyze();
+  if(s.auto){clearTimeout(window._at); window._at=setTimeout(()=>{if(S[idx]===s)next();},2200);}
+}
+function rt(v){SELF=+v;const e=document.getElementById('rtv');e.textContent=v;e.style.color=v<4?'#ff4b4b':v<7?'#f0a52a':'#1ed760';}
+function pickGoal(el,label){el.classList.toggle('sel');if(el.classList.contains('sel')){if(!GOALS.includes(label))GOALS.push(label);}else{GOALS=GOALS.filter(g=>g!==label);}const scr=el.closest('.scr');const c=scr&&scr.querySelector('.foot .cta');if(c)c.disabled=!scr.querySelector('.tile.sel');}
+function goalsPhrase(n){if(!GOALS.length)return 'your face';const g=GOALS.slice(0,n).map(x=>x.toLowerCase());return g.length===1?g[0]:g.slice(0,-1).join(', ')+' and '+g[g.length-1];}
+function pickCard(el){el.parentNode.querySelectorAll('.gcard').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');setTimeout(next,260);}
+function pickTier(i){document.querySelectorAll('.tier').forEach((t,j)=>t.classList.toggle('sel',j===i));document.getElementById('payc').textContent=TIERS[i].cta;}
+document.getElementById('filein').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{PHOTO=ev.target.result;render();};r.readAsDataURL(f);});
+function next(){if(idx<S.length-1){idx++;render();}}
+function back(){if(idx>0){idx--;render();}}
+function goTo(i){idx=Math.max(0,Math.min(S.length-1,i));render();}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')back();});
+document.getElementById('jump').innerHTML=S.map((s,i)=>`<option>${i+1}. ${s.ph} — ${(s.h||s.k).slice(0,32)}</option>`).join('');
+render();
+</script>
+</body>
+</html>

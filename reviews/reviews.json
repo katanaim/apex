@@ -1,0 +1,17 @@
+[
+ {"id":"g1","name":"Marcus","age":24,"scoreBefore":53,"scoreAfter":71,
+  "comment":"Lost the weight, fixed my skin, finally got a real haircut. 8 months and I'm a different person — girls actually text first now.",
+  "before":"g1-before.jpg","after":"g1-after.jpg"},
+ {"id":"g2","name":"Andre","age":22,"scoreBefore":51,"scoreAfter":70,
+  "comment":"Dropped 12kg, grew the beard out properly and got a clean lineup. The confidence boost is unreal.",
+  "before":"g2-before.jpg","after":"g2-after.jpg"},
+ {"id":"g3","name":"Kevin","age":25,"scoreBefore":48,"scoreAfter":71,
+  "comment":"Skin cleared up, ditched the glasses for contacts, fixed the hair. People at work treat me completely differently.",
+  "before":"g3-before.jpg","after":"g3-after.jpg"},
+ {"id":"g4","name":"Mateo","age":28,"scoreBefore":56,"scoreAfter":74,
+  "comment":"Lost 20kg and the jawline was hiding under there the whole time. Wish I'd started years ago.",
+  "before":"g4-before.jpg","after":"g4-after.jpg"},
+ {"id":"g5","name":"Rohan","age":23,"scoreBefore":49,"scoreAfter":68,
+  "comment":"Fixed my skin and brows first, then the hair and beard. I don't even recognise my old photos.",
+  "before":"g5-before.jpg","after":"g5-after.jpg"}
+]
