@@ -488,8 +488,44 @@ function next(){if(idx<S.length-1){idx++;render();}}
 function back(){if(idx>0){idx--;render();}}
 function goTo(i){idx=Math.max(0,Math.min(S.length-1,i));render();}
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')back();});
-document.getElementById('jump').innerHTML=S.map((s,i)=>`<option>${i+1}. ${s.ph} — ${(s.h||s.k).slice(0,32)}</option>`).join('');
-render();
+const CHKSVG='<div class="chk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#04240f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></div>';
+const ANALYZE_FINAL=`
+ <div class="astep" style="opacity:1"><div class="ico">${CHKSVG}</div><div class="body"><div class="ttl">Mapping 68 landmarks</div><div class="find" style="opacity:1"><span class="d" style="background:#1ed760"></span>Defined brow ridge</div></div></div>
+ <div class="astep" style="opacity:1"><div class="ico">${CHKSVG}</div><div class="body"><div class="ttl">Measuring proportions</div><div class="find" style="opacity:1"><span class="d" style="background:#1ed760"></span>Balanced facial thirds</div><div class="find" style="opacity:1"><span class="d" style="background:#f0a52a"></span>Midface slightly long</div></div></div>
+ <div class="astep" style="opacity:1"><div class="ico">${CHKSVG}</div><div class="body"><div class="ttl">Scoring skin &amp; symmetry</div><div class="find" style="opacity:1"><span class="d" style="background:#1ed760"></span>Strong symmetry</div><div class="find" style="opacity:1"><span class="d" style="background:#f0a52a"></span>Skin texture: improvable</div></div></div>
+ <div class="astep" style="opacity:1"><div class="ico">${CHKSVG}</div><div class="body"><div class="ttl">Calculating Looks Score</div></div></div>`;
+function fixupScreen(dev,s){
+  if(s.k==='reveal'){const n=dev.querySelector('#srn');if(n)n.textContent='67';}
+  if(s.k==='analyzing'){const box=dev.querySelector('#anbox');if(box)box.innerHTML=ANALYZE_FINAL;}
+  dev.querySelectorAll('[data-off]').forEach(c=>{c.style.transition='none';c.style.strokeDashoffset=c.getAttribute('data-off');});
+  dev.querySelectorAll('.foot .cta').forEach(b=>{b.disabled=false;});
+}
+function renderAllScreens(){
+  try{localStorage.setItem('apex-freeze','1');}catch(e){}
+  GOALS=['Jawline','Skin']; SELF=4; PHOTO=null; homeTab=0;
+  document.title='APEX — all screens';
+  const pg=document.querySelector('.page'); if(pg)pg.style.display='none';
+  const ov=document.createElement('style');
+  ov.textContent='.draw{stroke-dashoffset:0!important;animation:none!important}.pop{opacity:1!important;animation:none!important}.fill{transform:scaleX(1)!important;animation:none!important}.revtrack{animation:none!important}.scanl{display:none!important}.scr{animation:none!important}.allcol .device-x{width:390px;height:844px;background:#000;border-radius:44px;border:1px solid #222227;box-shadow:0 0 0 9px #050506;position:relative;overflow:hidden;display:flex;flex-direction:column;flex:0 0 auto}';
+  document.head.appendChild(ov);
+  const wrap=document.createElement('div');
+  wrap.style.cssText="display:flex;flex-wrap:wrap;gap:52px 40px;padding:60px;background:#0a0a0c;align-items:flex-start;justify-content:center;font-family:'Inter',sans-serif;";
+  document.body.appendChild(wrap);
+  S.forEach((s,i)=>{
+    const col=document.createElement('div'); col.className='allcol'; col.style.cssText='display:flex;flex-direction:column;gap:12px;align-items:center;';
+    const lbl=document.createElement('div'); lbl.style.cssText="font:600 12px 'Inter',sans-serif;color:#9a9aa6;text-align:center;max-width:390px;"; lbl.textContent=(i+1)+'. '+s.ph+' — '+((s.h||s.c||s.k).replace(/\n/g,' '));
+    const dev=document.createElement('div'); dev.className='device-x';
+    dev.innerHTML='<div class="notch"></div><div class="status"><span>9:41</span><span>●●●  ✦  100</span></div><div class="prog"><b style="width:'+Math.min(100,(i/(S.length-1))*100).toFixed(0)+'%"></b></div><div class="stage"></div>';
+    const stage=dev.querySelector('.stage'); stage.innerHTML=build(s);
+    col.appendChild(lbl); col.appendChild(dev); wrap.appendChild(col);
+    fixupScreen(dev,s);
+  });
+}
+if(new URLSearchParams(location.search).has('all')){ renderAllScreens(); }
+else {
+  document.getElementById('jump').innerHTML=S.map((s,i)=>`<option>${i+1}. ${s.ph} — ${(s.h||s.k).slice(0,32)}</option>`).join('');
+  render();
+}
 </script>
 </body>
 </html>
