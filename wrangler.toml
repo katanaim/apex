@@ -1,0 +1,10 @@
+name = "apex-scan"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# OPTIONAL — per-IP rate limit (protects your credits from abuse).
+# 1) wrangler kv namespace create RL
+# 2) paste the returned id below and uncomment:
+# [[kv_namespaces]]
+# binding = "RL"
+# id = "PASTE_KV_ID_HERE"

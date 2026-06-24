@@ -527,5 +527,8 @@ else {
   render();
 }
 </script>
+<!-- APEX live-scan link: real AI scoring (scan.html → secure Cloudflare proxy). Hidden in all-screens/freeze view. -->
+<a id="livebtn" href="scan.html" style="position:fixed;right:16px;bottom:16px;z-index:99;display:flex;align-items:center;gap:7px;background:#1ed760;color:#04240f;font:800 13px 'Inter',sans-serif;text-decoration:none;padding:11px 15px;border-radius:30px;box-shadow:0 6px 22px rgba(30,215,96,.35)">⚡ Real AI scan</a>
+<script>if(new URLSearchParams(location.search).has('all')||localStorage.getItem('apex-freeze')){var b=document.getElementById('livebtn');if(b)b.style.display='none';}</script>
 </body>
 </html>
