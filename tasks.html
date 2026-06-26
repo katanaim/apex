@@ -1,0 +1,109 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>APEX — Task Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Inter:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--g:#1ed760;--a:#f0a52a;--r:#ff4b4b;--mut:#7d7d83;--ln:#222227;--card:#0e0e10}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0a0a0c;color:#fff;font-family:'Inter',sans-serif;line-height:1.45}
+.wrap{max-width:940px;margin:0 auto;padding:24px 18px 60px}
+.brand{font-family:'Archivo';font-weight:900;letter-spacing:3px;font-size:16px}
+.tag{color:var(--mut);font-size:12px;font-family:'Space Mono';margin:2px 0 0}
+h1{font-family:'Archivo';font-weight:900;font-size:26px;letter-spacing:-.5px;margin:14px 0 2px;text-transform:uppercase}
+.sub{color:var(--mut);font-size:13px;margin:0 0 16px}
+.bar{position:sticky;top:0;background:rgba(10,10,12,.93);backdrop-filter:blur(8px);padding:12px 0;border-bottom:1px solid var(--ln);z-index:5;margin-bottom:8px}
+.flbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;font-family:'Space Mono';margin:0 0 5px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.chip{background:#101013;border:1px solid var(--ln);color:#cfcfd3;font-size:12px;padding:5px 11px;border-radius:20px;cursor:pointer;font-weight:600;white-space:nowrap}
+.chip.on{border-color:var(--g);color:#fff;background:rgba(30,215,96,.1)}
+.chip.dz.on{border-color:var(--a);background:rgba(240,165,42,.1)}
+#q{width:100%;background:#101013;border:1px solid var(--ln);color:#fff;border-radius:10px;padding:9px 12px;font-size:13px;font-family:inherit;margin-top:2px}
+.stat{font-size:12px;color:var(--mut);font-family:'Space Mono';margin:10px 0 2px}
+.zh{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:7px;margin-top:26px}
+.zh b{font-family:'Archivo';font-weight:900;font-size:19px}.zh span{font-size:11px;color:var(--mut);font-family:'Space Mono'}
+.sp{font-size:13px;font-weight:700;color:var(--a);margin:16px 0 7px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.ct{display:flex;align-items:flex-start;gap:10px}
+.dbadge{flex:0 0 auto;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:900;font-size:13px;color:#04240f}
+.cttl{flex:1;font-size:14.5px;font-weight:700;line-height:1.3}
+.evd{flex:0 0 auto;width:8px;height:8px;border-radius:50%;margin-top:7px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 0 36px}
+.bdg{font-size:10px;font-family:'Space Mono';padding:2px 7px;border-radius:5px;border:1px solid var(--ln);color:var(--mut)}
+.bdg.tr{color:#9ad2ff;border-color:#21384a}.bdg.sh{color:var(--a);border-color:#4a3a1a}.bdg.med{color:var(--r);border-color:#4a1f1f}
+.meta{font-size:11px;color:var(--mut);font-family:'Space Mono';margin:7px 0 8px 36px}
+.body{margin-left:36px;font-size:13px}
+.body .row{margin-bottom:4px}.body b{color:#fff}.body .do{color:#e8e8ea}.body .wi{color:#bcbcc2}.imp{color:var(--g)}
+.disc{margin:6px 0 0 36px;font-size:10.5px;color:#bca06a;line-height:1.35}
+.empty{color:var(--mut);text-align:center;padding:40px;font-family:'Space Mono'}
+</style></head>
+<body><div class="wrap">
+<div class="brand">APEX</div><div class="tag">task library · 90-day glow-up</div>
+<h1>Task Library</h1>
+<p class="sub" id="sub">Loading…</p>
+<div class="bar">
+  <div class="flbl">Zone</div><div class="chips" id="zones"></div>
+  <div class="flbl">Difficulty</div><div class="chips" id="diffs"></div>
+  <div class="flbl">Track</div><div class="chips" id="tracks"></div>
+  <div class="flbl">Evidence</div><div class="chips" id="evs"></div>
+  <input id="q" placeholder="Search tasks (e.g. sodium, gua sha, minoxidil)…" oninput="F.q=this.value.toLowerCase();render()">
+</div>
+<div class="stat" id="stat"></div>
+<div id="out"></div>
+</div>
+<script>
+let ZONES=[], TASKS=[];
+const F={zone:'all',diff:'all',track:'all',ev:'all',q:''};
+const DIFFC=['','#1ed760','#9ad21e','#f0a52a','#ff8c3a','#ff4b4b'];
+const EVC={'evidence-based':'var(--g)','plausible':'var(--a)','anecdotal':'var(--mut)'};
+const TRL={daily:'daily',weekly:'weekly goal',oneoff:'one-time',consult:'research+consult'};
+const esc=s=>(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const sch=s=>{if(!s)return '';const sl=s.slot&&s.slot!=='any'?' '+s.slot.toUpperCase():'';return ({daily:(s.n===2?'twice daily':'daily'),every_n_days:'every '+s.n+'d',per_week:s.n+'×/wk',weekly:'weekly',monthly:'monthly',ongoing:'ongoing',once:'once',as_needed:'as needed'}[s.cadence]||s.cadence)+sl;};
+
+fetch('tasks.json').then(r=>r.json()).then(d=>{
+  ZONES=d.meta.zones; TASKS=d.tasks;
+  const shared=TASKS.filter(t=>(t.zones||[]).length>1).length;
+  document.getElementById('sub').textContent=`${TASKS.length} unique tasks · 13 zones · ${shared} shared across zones (deduplicated). Each tied to a sub-problem; medications are reframed to research+consult.`;
+  document.getElementById('zones').innerHTML=[['all','All']].concat(ZONES.map(z=>[z.key,z.label])).map(([k,l])=>`<span class="chip dz ${k==='all'?'on':''}" data-z="${k}" onclick="setF('zone','${k}',this,'zones')">${l}</span>`).join('');
+  document.getElementById('diffs').innerHTML=[['all','All'],['1','D1'],['2','D2'],['3','D3'],['4','D4'],['5','D5']].map(([k,l])=>`<span class="chip ${k==='all'?'on':''}" onclick="setF('diff','${k}',this,'diffs')">${l}</span>`).join('');
+  document.getElementById('tracks').innerHTML=[['all','All'],['daily','Daily'],['weekly','Weekly goal'],['oneoff','One-time'],['consult','Research+consult']].map(([k,l])=>`<span class="chip ${k==='all'?'on':''}" onclick="setF('track','${k}',this,'tracks')">${l}</span>`).join('');
+  document.getElementById('evs').innerHTML=[['all','All'],['evidence-based','✓ evidence'],['plausible','~ plausible'],['anecdotal','? anecdotal']].map(([k,l])=>`<span class="chip ${k==='all'?'on':''}" onclick="setF('ev','${k}',this,'evs')">${l}</span>`).join('');
+  render();
+});
+function setF(f,v,el,grp){F[f]=v;document.querySelectorAll('#'+grp+' .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');render();}
+function match(t){
+  if(F.diff!=='all'&&String(t.difficulty)!==F.diff)return false;
+  if(F.track!=='all'&&t.track!==F.track)return false;
+  if(F.ev!=='all'&&t.evidence!==F.ev)return false;
+  if(F.q){const h=(t.title+' '+(t.action||t.how)+' '+t.why).toLowerCase();if(!h.includes(F.q))return false;}
+  return true;
+}
+function card(t,zoneKey){
+  const sh=(t.zones||[]).length>1?`<span class="bdg sh">shared · ${t.zones.length} zones</span>`:'';
+  const md=t.is_med?`<span class="bdg med">research+consult</span>`:'';
+  return `<div class="card"><div class="ct">
+    <div class="dbadge" style="background:${DIFFC[t.difficulty]}">${t.difficulty}</div>
+    <div class="cttl">${esc(t.title)}</div>
+    <div class="evd" style="background:${EVC[t.evidence]||'var(--mut)'}" title="${t.evidence}"></div></div>
+    <div class="badges"><span class="bdg tr">${TRL[t.track]||t.track}</span><span class="bdg">${esc(sch(t.schedule))}</span><span class="bdg">${esc(t.type)}</span>${sh}${md}</div>
+    <div class="body" style="margin-top:8px"><div class="row do"><b>Do:</b> ${esc(t.action||t.how)}</div><div class="row wi"><b>Why:</b> ${esc(t.why)} <span class="imp"><b>→</b> ${esc(t.impact)}</span></div></div>
+    ${t.disclaimer?`<div class="disc">⚕ ${esc(t.disclaimer)}</div>`:''}
+  </div>`;
+}
+function render(){
+  let shown=new Set(), html='';
+  const zlist=ZONES.filter(z=>F.zone==='all'||z.key===F.zone);
+  for(const z of zlist){
+    const ts=TASKS.filter(t=>(t.zones||[]).includes(z.key)&&match(t));
+    if(!ts.length)continue;
+    ts.forEach(t=>shown.add(t.id));
+    const groups={},order=[];
+    for(const t of ts){const p=(t.problems||[]).find(p=>p.zone===z.key); const key=p?p.problem:(t.problem||'General');
+      if(!groups[key]){groups[key]=[];order.push(key);} groups[key].push(t);}
+    html+=`<div class="zh"><b>${esc(z.label)}</b><span>${ts.length} tasks</span></div>`;
+    for(const p of order){html+=`<div class="sp">${esc(p)}</div>`+groups[p].sort((a,b)=>a.difficulty-b.difficulty).map(t=>card(t,z.key)).join('');}
+  }
+  document.getElementById('stat').textContent=`Showing ${shown.size} unique tasks across ${zlist.length} zone(s)  ·  difficulty 1 (easiest) → 5 (professional)`;
+  document.getElementById('out').innerHTML=html||`<div class="empty">No tasks match these filters.</div>`;
+}
+</script></body></html>
